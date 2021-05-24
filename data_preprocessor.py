@@ -11,11 +11,14 @@ class Data_preprocessor(object):
     def __init__(self):
         # self.contrast_rate = contrast_rate
         # self.line_rate = line_rate
+        return
         
 
-    def data_preprocess(self, img, contrast_rate = 0.5, line_rate = 0.2):
+    def data_preprocess(self, img_, contrast_rate=0.5, line_rate=0.2):
+        print(contrast_rate, line_rate)
         # 降噪
-        img = self.dec_noise(img, contrast_rate)
+        img = self.dec_noise(img_, contrast_rate)
+        plt.imshow(img)
         # 将一页曲谱裁成一行
         res_line = self.cnt_line(img)
 
@@ -23,37 +26,44 @@ class Data_preprocessor(object):
         # 将一行曲谱裁剪成单个音符
         for item in res_line:
             res += self.cut_note(item, line_rate)
+        self.save_preprocessed_data(res, "1/")
         return res
 
 
     # 加载图片
     def load_img(self, pos):
         img = (plt.imread(pos)).astype(np.float64)
+        # plt.imshow(img)
         return img
 
 
     # 保存数据
-    def save_preprocessed_data(self, res, pos="", constrain_img_size=False, width=40, height=40):
+    def save_preprocessed_data(self, res, pos="", bias=0, constrain_img_size=False, width=40, height=40):
         if constrain_img_size:
             for i in range(len(res)):
                 img = self.cut_down_border(res[i])
                 img = self.zero_padding(img)
-                Image.fromarray((img * 255).astype('uint8')).resize((width, height)).save(pos + str(i) + ".png")
+                Image.fromarray((img * 255).astype('uint8')).resize((width, height)).save(pos + str(i + bias) + ".png")
         else:
             for i in range(len(res)):
-                Image.fromarray(np.uint8(cut_down_border(res[i]) * 255)).save(pos + str(i) + ".png")
+                Image.fromarray(np.uint8(self.cut_down_border(res[i]) * 255)).save(pos + str(i + bias) + ".png")
 
 
-    def dec_noise(self, img, contrast_rate = 0.65):
-        img[img >= contrast_rate] = 1
-        img[img < contrast_rate] = 0
+    def dec_noise(self, img_, contrast_rate = 0.65):
+        img = img_.copy()
+        x = img[:, :, 0] * 0.299 + img[:, :, 1] * 0.587 + img[:, :, 2] * 0.114
+        x[x >= contrast_rate] = 1
+        x[x < contrast_rate] = 0
+        img[:, :, 0] = x
+        img[:, :, 1] = x
+        img[:, :, 2] = x
         return img
 
 
     # 将一行曲谱裁成音符
     def cut_note(self, img, line_rate = 0.2):
         # 裁去上下白色多余部分
-        img = img[(img.sum(1).sum(1) / img.shape[2] / img.shape[1]) != 1]
+        img = img[(img.sum(2).sum(1) / img.shape[2] / img.shape[1]) != 1]
         # 去掉连音线
     #     tmp = img[:, (img.sum(2).sum(0) / img.shape[2] / img.shape[0]) != 1]
     #     if ((tmp.sum(1).sum(1) / tmp.shape[2] / tmp.shape[1])[:int(tmp.shape[0] * 0.2)].sum() / int(tmp.shape[0] * 0.2) > 0.95):
@@ -117,10 +127,10 @@ class Data_preprocessor(object):
         return x_pad
 
 
-    def constrain_img_size(self, img, width=60, height=60):
+    def constrain_img_size(self, img, width=40, height=40):
         img = self.cut_down_border(img)
         img = self.zero_padding(img)
-        img = Image.fromarray((img * 255).astype('uint8'))
+        img = Image.fromarray((img).astype('uint8'))
         img = img.resize((width, height))
         img = np.array(img)
         return img

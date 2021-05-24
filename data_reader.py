@@ -4,12 +4,18 @@ from data_preprocessor import Data_preprocessor
 
 class Data_reader(object):
     """docstring for Data_reader"""
-    def __init__(self, arg):
-        dp = Data_preprocessor()
+    def __init__(self, img_cnt=987, img_width=40, img_height=40):
+        self.dp = Data_preprocessor()
+        self.img_cnt = img_cnt
+        self.img_width = img_width
+        self.img_height = img_height
+        return
 
     def read_img(self, path):
-        for i in range(len(res)):
-            X[i] = dp.load_img(path + str(i) + ".png")
+        X = np.zeros((self.img_cnt, self.img_width, self.img_height, 3))
+        for i in range(self.img_cnt):
+            X[i] = self.dp.dec_noise(self.dp.load_img(path + str(i) + ".png"), 0.6)
+        return X
 
 
     def read_label(self, path):
@@ -27,12 +33,18 @@ class Data_reader(object):
 
 
     def read_csv(self, path):
-
         with open(path, 'rt', encoding='UTF-8') as raw_data:
             readers = reader(raw_data,delimiter=',')
             x = list(readers)
             data = np.array(x)
         return data[0], data[1:]
+
+
+    # def cnt_labels_rate(self, y):
+    # cnt = []
+    # for i in range(len(set(y))):
+    #     cnt.append((y == i).sum() / y.shape[0])
+    # return cnt
 
 
     def num_note(self, note):
