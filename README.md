@@ -34,6 +34,6 @@ If you are not satisfied in using my models, you can also train your own models.
 
 Firstly,  use data_preprocessor to cut whole notation into many notes then label your data, as I have uploaded my training data, you can also use it to train.
 
-Secondly, I uploaded a effective tool named "data_splitter", which could separate the input data set and it's labels into specified scale training set, valid set and test set, and guaranteed the valid set and test have the same distribution as the whole data set.
+Secondly, I uploaded a effective tool named "data_splitter", which could separate the input data set and it's labels into specified scale training set, valid set and test set, and guaranteed the valid set and test have the same distribution as the whole data set. That allows the models with a large data set to converge in a shorter time, and enables some models with small data set to converge.
 
 Then use Tensorflow or Pytorch or any frame you are familiar to train a better model.
